@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Dağ Döner – Yönetim</title>
+<link rel="icon" href="/img/logo-single.webp">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1c0b0b;--red:#d4181f;--mustard:#ffc72c;--cream:#fff4dc;--pickle:#2f8a3a;color-scheme:light}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:600 16px/1.4 Archivo,system-ui,sans-serif}
+h1,h2{font-family:Anton,Impact,sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.02em;margin:0}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+.btn{cursor:pointer;font-weight:800;background:var(--mustard);border:3px solid var(--ink);border-radius:10px;padding:9px 18px;box-shadow:3px 3px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.red{background:var(--red);color:#fff}.btn.ghost{background:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}
+input,textarea{width:100%;background:#fff;border:3px solid var(--ink);border-radius:8px;padding:8px 10px}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--red)}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+#login{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--red)}
+#login form{background:var(--cream);border:4px solid var(--ink);box-shadow:8px 8px 0 var(--ink);border-radius:16px;padding:28px;width:min(380px,100%);display:grid;gap:12px;text-align:center}
+#login img{width:110px;margin:0 auto;border-radius:50%}
+#login label{text-align:left;font-weight:800;font-size:.9rem}
+.err{color:var(--red);font-weight:800;min-height:1.4em;margin:0}
+.top{position:sticky;top:0;z-index:10;background:var(--ink);color:var(--cream);display:flex;align-items:center;gap:12px;padding:10px 16px}
+.top img{width:42px;height:42px;border-radius:50%}.top h1{font-size:1.3rem;flex:1}
+.top .btn{padding:7px 14px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 4px;max-width:1000px;margin:auto}
+.tabs button{flex:none;cursor:pointer;font-weight:800;background:#fff;border:3px solid var(--ink);border-radius:8px;padding:6px 12px}
+.tabs button.on{background:var(--mustard)}
+#panel{max-width:1000px;margin:auto;padding:12px 16px 90px}
+.meta{background:#fff;border:3px solid var(--ink);border-radius:12px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:10px;margin-bottom:16px}
+.meta .full{grid-column:1/-1}.meta label{display:flex;gap:8px;align-items:center}
+.it{display:flex;gap:12px;background:#fff;border:3px solid var(--ink);border-radius:12px;box-shadow:4px 4px 0 var(--ink);padding:10px;margin-bottom:14px}
+.im{flex:none;position:relative;width:150px;height:112px;border:3px dashed var(--ink);border-radius:10px;display:grid;place-items:center;cursor:pointer;background:repeating-linear-gradient(45deg,var(--mustard) 0 10px,#ffd75e 10px 20px);overflow:hidden}
+.im img{width:100%;height:100%;object-fit:cover}.im.busy{opacity:.5}
+.im b{position:absolute;top:4px;right:4px;background:var(--red);color:#fff;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:.8rem}
+.fs{flex:1;min-width:0;display:grid;gap:8px}
+.r2{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.r2 label{display:flex;gap:8px;align-items:center}.r2 input[type=number]{width:110px}
+.ac{display:flex;flex-direction:column;gap:6px}.ac button{cursor:pointer;background:#fff;border:3px solid var(--ink);border-radius:8px;width:40px;height:36px}
+.hint{font-size:.85rem;opacity:.7;margin:0 0 12px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 20px;border-radius:10px;font-weight:800;z-index:50}
+#toast.bad{background:var(--red)}
+@media(max-width:640px){.it{flex-wrap:wrap}.im{width:100%;height:150px}.ac{flex-direction:row;width:100%}.ac button{flex:1}}
+</style>
+</head>
+<body>
+<div id="login" hidden>
+  <form id="lf">
+    <img src="/img/logo-single.webp" alt="Dağ Döner">
+    <h2>Yönetim Paneli</h2>
+    <label>Kullanıcı adı<input name="user" autocomplete="username" required></label>
+    <label>Şifre<input name="password" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="le" role="alert"></p>
+    <button class="btn" id="lb">Giriş yap</button>
+  </form>
+</div>
+<div id="dash" hidden>
+  <div class="top">
+    <img src="/img/logo-single.webp" alt=""><h1>Menü Yönetimi</h1>
+    <a class="btn ghost" href="/" target="_blank" style="text-decoration:none">Menüyü aç</a>
+    <button class="btn red" id="save" disabled>Kaydet</button>
+    <button class="btn ghost" id="out">Çıkış</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="panel"></div>
+</div>
+<input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/*" hidden>
+<div id="toast" hidden></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let menu,tab=0,dirty=false,target=null;
+const api=async(u,o={})=>{const r=await fetch(u,{credentials:"same-origin",...o});const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.error||"Bir hata oluştu."),{status:r.status});return d};
+const json=(m,b)=>({method:m,headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});
+function toast(t,bad){const e=$("#toast");e.textContent=t;e.className=bad?"bad":"";e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2800)}
+function mark(v=true){dirty=v;$("#save").disabled=!v;$("#save").textContent=v?"Kaydet •":"Kaydet"}
+const isPoster=()=>tab>=menu.categories.length;
+const cat=()=>menu.categories[tab];
+const list=()=>isPoster()?menu.posters:cat().items;
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+function itemH(it,i,photo,full){
+  return `<div class="it" data-i="${i}">${photo?`<div class="im" data-act="pick" title="Fotoğraf yükle">${it.img?`<img src="${esc(it.img)}" alt="">`:"<span>+ Fotoğraf</span>"}${it.img?'<b data-act="rm" title="Fotoğrafı kaldır">✕</b>':""}</div>`:""}
+  <div class="fs"><input data-f="name" value="${esc(it.name)}" placeholder="${full?"Ürün adı":"Başlık"}" maxlength="120">
+  ${full?`<textarea data-f="desc" rows="2" placeholder="Açıklama" maxlength="300">${esc(it.desc)}</textarea>`:""}
+  <div class="r2"><label>Fiyat (₺) <input data-f="price" type="number" min="0" step="1" value="${esc(it.price)}"></label>
+  ${full?`<label><input data-f="star" type="checkbox" ${it.star?"checked":""}> Favori</label>`:""}</div></div>
+  <div class="ac"><button data-act="up" title="Yukarı">↑</button><button data-act="dn" title="Aşağı">↓</button><button data-act="del" title="Sil">🗑</button></div></div>`;
+}
+function render(){
+  $("#tabs").innerHTML=menu.categories.map((c,i)=>`<button data-tab="${i}" class="${i===tab?"on":""}">${esc(c.icon)} ${esc(c.short||c.title)}</button>`).join("")+`<button data-tab="${menu.categories.length}" class="${isPoster()?"on":""}">🔥 Posterler</button>`;
+  let h="";
+  if(isPoster()){
+    h=`<p class="hint">Ana sayfadaki “Denediniz mi?” bölümünde görünür. Hiç poster bırakmazsanız bölüm gizlenir.</p>`+menu.posters.map((p,i)=>itemH(p,i,true,false)).join("")+`<button class="btn" data-act="add">+ Poster ekle</button>`;
+  }else{
+    const c=cat();
+    h=`<div class="meta"><label>İkon<input data-c="icon" value="${esc(c.icon)}" maxlength="8"></label><label>Kategori adı<input data-c="title" value="${esc(c.title)}" maxlength="80"></label>
+    <div class="full"><input data-c="note" value="${esc(c.note)}" placeholder="Kategori notu (isteğe bağlı)" maxlength="300"></div>
+    <label class="full"><input type="checkbox" data-c="photos" ${c.photos?"checked":""}> Bu kategoride fotoğraf alanı göster</label></div>`
+    +c.items.map((it,i)=>itemH(it,i,c.photos,true)).join("")+`<button class="btn" data-act="add">+ Ürün ekle</button>`;
+  }
+  $("#panel").innerHTML=h;
+}
+$("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(b){tab=+b.dataset.tab;render()}};
+$("#panel").addEventListener("input",e=>{
+  const t=e.target,row=t.closest("[data-i]");
+  if(t.dataset.c){const c=cat();c[t.dataset.c]=t.type==="checkbox"?t.checked:t.value;mark();if(t.dataset.c==="photos")render();return}
+  if(row&&t.dataset.f){const it=list()[+row.dataset.i];it[t.dataset.f]=t.type==="checkbox"?t.checked:t.type==="number"?Math.max(0,+t.value||0):t.value;mark()}
+});
+$("#panel").addEventListener("click",e=>{
+  const a=e.target.closest("[data-act]");if(!a)return;
+  const row=a.closest("[data-i]"),i=row?+row.dataset.i:-1,L=list(),act=a.dataset.act;
+  if(act==="add"){L.push({id:uid(),name:isPoster()?"Yeni poster":"Yeni ürün",desc:"",price:0,star:false,img:""});mark();render();$("#panel").querySelectorAll(".it").item(L.length-1)?.scrollIntoView({block:"center"});return}
+  if(act==="pick"){target=L[i];$("#file").value="";$("#file").click()}
+  if(act==="rm"){e.stopPropagation();L[i].img="";mark();render()}
+  if(act==="up"&&i>0){[L[i-1],L[i]]=[L[i],L[i-1]];mark();render()}
+  if(act==="dn"&&i<L.length-1){[L[i+1],L[i]]=[L[i],L[i+1]];mark();render()}
+  if(act==="del"&&confirm(`“${L[i].name}” silinsin mi?`)){L.splice(i,1);mark();render()}
+});
+async function shrink(file){
+  const bm=await createImageBitmap(file),s=Math.min(1,1200/Math.max(bm.width,bm.height));
+  const c=document.createElement("canvas");c.width=Math.round(bm.width*s);c.height=Math.round(bm.height*s);
+  c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+  return new Promise(r=>c.toBlob(r,"image/webp",.82));
+}
+$("#file").onchange=async e=>{
+  const f=e.target.files[0],it=target;if(!f||!it)return;
+  const box=document.querySelector(`.it[data-i="${list().indexOf(it)}"] .im`);box&&box.classList.add("busy");
+  try{
+    const blob=await shrink(f);
+    const d=await api("/api/upload",{method:"POST",headers:{"Content-Type":blob.type},body:blob});
+    it.img=d.url;mark();toast("Fotoğraf yüklendi. Kaydetmeyi unutmayın.");
+  }catch(err){toast(err.message,true)}
+  render();
+};
+$("#save").onclick=async()=>{
+  $("#save").disabled=true;
+  try{await api("/api/menu",json("PUT",menu));mark(false);toast("Kaydedildi. Menü birkaç saniye içinde güncellenir.")}
+  catch(err){mark();toast(err.message,true);if(err.status===401)showLogin()}
+};
+$("#out").onclick=async()=>{if(dirty&&!confirm("Kaydedilmemiş değişiklikler var. Çıkılsın mı?"))return;await api("/api/logout",{method:"POST"});location.reload()};
+window.addEventListener("beforeunload",e=>{if(dirty){e.preventDefault();e.returnValue=""}});
+function showLogin(){$("#dash").hidden=true;$("#login").hidden=false}
+$("#lf").onsubmit=async e=>{
+  e.preventDefault();$("#le").textContent="";$("#lb").disabled=true;
+  const f=new FormData(e.target);
+  try{await api("/api/login",json("POST",{user:f.get("user"),password:f.get("password")}));await start()}
+  catch(err){$("#le").textContent=err.message}
+  $("#lb").disabled=false;
+};
+async function start(){
+  menu=await api("/api/menu?t="+Date.now());menu.posters=menu.posters||[];
+  $("#login").hidden=true;$("#dash").hidden=false;tab=0;mark(false);render();
+}
+(async()=>{try{const s=await api("/api/session");s.authed?await start():showLogin()}catch(e){showLogin()}})();
+</script>
+</body>
+</html>
